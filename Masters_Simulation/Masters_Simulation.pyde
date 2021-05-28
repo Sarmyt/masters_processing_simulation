@@ -98,7 +98,7 @@ for i in range(len(ydim)):
     
 def exit_handler():
     global string_list
-    saveStrings("option{}_data_theo.txt".format(option), string_list)
+    saveStrings("data/option{}_data_theo.txt".format(option), string_list)
 
 atexit.register(exit_handler)
     
@@ -251,10 +251,8 @@ def draw():
         global_coverage += coverage   
             
     fill(255, 255, 255)
-    # textSize(25);
-    # text(int(global_coverage), 20, 40)
     
-    saveFrame("Option {}/frame-######.png".format(option))
+    saveFrame("data/Option {}/frame-######.png".format(option))
     
     if reset:
         reset = False
