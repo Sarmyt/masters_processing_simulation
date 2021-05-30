@@ -288,9 +288,11 @@ def draw():
         for j in range(len(vors[i])):
             dis = dist(agent_pos[i][0], agent_pos[i][1], vors[i][j][0], vors[i][j][1])
             sense = math.exp(-(dis**2)/(30**2))
-            coverage += risk[index[i][j][1]][index[i][j][0]]*sense
+            coverage += risk[index[i][j][1]][index[i][j][0]]*sense*100.0
             
         global_coverage += coverage   
+        
+    print(global_coverage)
             
     fill(255, 255, 255)
     
