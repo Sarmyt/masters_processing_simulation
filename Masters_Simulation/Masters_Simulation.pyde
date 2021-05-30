@@ -69,8 +69,8 @@ height_sections = 48
 
 # Creation of mesh grid to discretize environment
 
-xdim = list(linspace(0, w, width_sections))
-ydim = list(linspace(0, h, height_sections))
+xdim = list(linspace(5, w - 5, width_sections))
+ydim = list(linspace(5, h - 5, height_sections))
 X, Y = meshgrid(xdim,ydim)
 
 step_size = 50 # Step size taken by a point agent towards its desired position
@@ -79,7 +79,7 @@ num_agents = 5 # Number of agents in the environment
 
 # Variables for defining the risk distribution scenario
 
-option = 3 # Variable for selecting between scenario 1, scenario 2 and scenario 3
+option = 1 # Variable for selecting between scenario 1, scenario 2 and scenario 3
 a = 1
 b = 0.0001
 
@@ -199,8 +199,8 @@ def draw():
     for n in range(num_agents):
         for i in range(len(ydim)):
             for j in range(len(xdim)):
-                
-                if distance[n][i][j] \ # Ensure that distance between agent "n" and point [i, j] is less than distance between all other agents and point [i, j]
+                # Ensure that distance between agent "n" and point [i, j] is less than distance between all other agents and point [i, j]
+                if distance[n][i][j] \
                 <= min(distance[0][i][j], \
                        distance[1][i][j], \
                        distance[2][i][j], \
@@ -229,9 +229,9 @@ def draw():
             risk_x = 0
             risk_y = 0
             for j in range(len(vors[i])):
-                risk_t += risk[index[i][j][1]][index[i][j][0]]
-                risk_x += vors[i][j][0]*risk[index[i][j][1]][index[i][j][0]]
-                risk_y += vors[i][j][1]*risk[index[i][j][1]][index[i][j][0]]
+                risk_t += risk[index[i][j][1]][index[i][j][0]]*100
+                risk_x += vors[i][j][0]*risk[index[i][j][1]][index[i][j][0]]*100
+                risk_y += vors[i][j][1]*risk[index[i][j][1]][index[i][j][0]]*100
                     
             C_x = (risk_x/risk_t)
             C_y = (risk_y/risk_t)
