@@ -79,7 +79,7 @@ num_agents = 5 # Number of agents in the environment
 
 # Variables for defining the risk distribution scenario
 
-option = 1 # Variable for selecting between scenario 1, scenario 2 and scenario 3
+option = 3 # Variable for selecting between scenario 1, scenario 2 and scenario 3
 a = 1
 b = 0.0001
 
@@ -287,12 +287,10 @@ def draw():
         coverage = 0
         for j in range(len(vors[i])):
             dis = dist(agent_pos[i][0], agent_pos[i][1], vors[i][j][0], vors[i][j][1])
-            sense = math.exp(-(dis**2)/(30**2))
+            sense = math.exp(-(dis**2)/(150**2))
             coverage += risk[index[i][j][1]][index[i][j][0]]*sense*100.0
             
         global_coverage += coverage   
-        
-    print(global_coverage)
             
     fill(255, 255, 255)
     
