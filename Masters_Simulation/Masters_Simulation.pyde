@@ -74,7 +74,6 @@ ydim = list(linspace(5, h - 5, height_sections))
 X, Y = meshgrid(xdim,ydim)
 
 step_size = 50 # Step size taken by a point agent towards its desired position
-agent = 0 # Variable holding agent ID
 num_agents = 5 # Number of agents in the environment
 
 # Variables for defining the risk distribution scenario
@@ -85,18 +84,18 @@ b = 0.0001
 
 isSuccess = [False, False, False, False, False] # Array indicating which agents have arrived at desired position
 reset = True # Variable indicating first run through of the loop
-moving = False # Variable to indicate point agent motion for 2 seconds
+moving = [False, False, False, False, False] # Array to indicate point agent motion for 5 seconds
 abso_start = millis() # Recording start time of program
 buffer = 0 # Time correction to offset time required for simulation setup
 
-start = millis() # Initiating movement timer
+start = [millis(), millis(), millis(), millis(), millis()] # Initiating movement timer
 
 # Variables used for changing position of point agents
 
-changex = 0
-changey = 0
-temp_agent_x = 0
-temp_agent_y = 0
+changex = [0, 0, 0, 0, 0]
+changey = [0, 0, 0, 0, 0]
+temp_agent_x = [0, 0, 0, 0, 0]
+temp_agent_y = [0, 0, 0, 0, 0]
 
 # Variables used for storing data output information
 
@@ -117,21 +116,21 @@ cent = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]
 risk = []        
     
 if option == 1:
-    agent_pos = [[245, 389], [145, 393], [159, 174], [114, 312], [195, 302]]
+    agent_pos = [[264, 116], [365, 313], [504, 279], [444, 125], [362, 205]]
 
 elif option == 2:
     target = [320, 240]
-    agent_pos = [[409, 90], [99, 114], [109, 421], [308, 238], [466, 327]]
+    agent_pos = [[445, 321], [153, 403], [335, 150], [134, 154], [420, 124]]
 
 elif option == 3:
     target = [485, 320]
-    agent_pos = [[168, 231], [248, 101], [335, 271], [138, 140], [372, 121]]
+    agent_pos = [[300, 221], [89, 117], [174, 124], [379, 94], [166, 301]]
 
 for i in range(len(ydim)):
     temp_risk = []
     for j in range(len(xdim)):
         if option == 1:
-            temp_risk.extend([1])
+            temp_risk.extend([1.0])
             
         else:
             dis = dist(xdim[j], ydim[i], target[0], target[1])
@@ -220,18 +219,19 @@ def draw():
     if sum(isSuccess) == 5 or reset: # If this is first loop of program, or all agents have arrived at desired location
         
         iteration = iteration + 1
-        
-        agent = 0        
-    
+            
         for i in range(num_agents): # Calculate the centroid of each Voronoi cell given the risk distribution
             isSuccess[i] = False
             risk_t = 0
             risk_x = 0
             risk_y = 0
             for j in range(len(vors[i])):
-                risk_t += risk[index[i][j][1]][index[i][j][0]]*100
-                risk_x += vors[i][j][0]*risk[index[i][j][1]][index[i][j][0]]*100
-                risk_y += vors[i][j][1]*risk[index[i][j][1]][index[i][j][0]]*100
+                dis = dist(agent_pos[i][0], agent_pos[i][1], vors[i][j][0], vors[i][j][1])
+                sense = math.exp(-(dis**2)/(150**2))
+                                
+                risk_t += risk[index[i][j][1]][index[i][j][0]]*100.0*sense
+                risk_x += vors[i][j][0]*risk[index[i][j][1]][index[i][j][0]]*100.0*sense
+                risk_y += vors[i][j][1]*risk[index[i][j][1]][index[i][j][0]]*100.0*sense
                     
             C_x = (risk_x/risk_t)
             C_y = (risk_y/risk_t)
@@ -250,34 +250,34 @@ def draw():
     for i in range(num_agents):
         ellipse(agent_pos[i][0], agent_pos[i][1], 10, 10) # Draw the position of all agents
         
-        
-    if moving == False: # If the agent is currently not moving then initiate movement
-        
-        angle = math.atan2(-(cent[agent][1] - agent_pos[agent][1]), cent[agent][0] - agent_pos[agent][0]) # Calculate angle of movement to get robot to its desired position
-        temp_distance = dist(agent_pos[agent][0], agent_pos[agent][1], cent[agent][0], cent[agent][1]) # Calculate distance between agent and its desired position
-                
-        # Calculate the required movement of agent in the X direction        
-                
-        if (cent[agent][0] - agent_pos[agent][0]) < 0:
-            changex = max(-math.cos(angle)*(-temp_distance), -math.cos(angle)*(-step_size))
-        elif (cent[agent][0] - agent_pos[agent][0]) > 0:
-            changex = min(math.cos(angle)*(temp_distance), math.cos(angle)*step_size)
-        else:
-            changex = 0
+    for agent in range(num_agents):
+        if moving[agent] == False: # If the agent is currently not moving then initiate movement
             
-        # Calculate the required movement of agent in the Y direction  
+            angle = math.atan2(-(cent[agent][1] - agent_pos[agent][1]), cent[agent][0] - agent_pos[agent][0]) # Calculate angle of movement to get robot to its desired position
+            temp_distance = dist(agent_pos[agent][0], agent_pos[agent][1], cent[agent][0], cent[agent][1]) # Calculate distance between agent and its desired position
+                    
+            # Calculate the required movement of agent in the X direction        
+                    
+            if (cent[agent][0] - agent_pos[agent][0]) < 0:
+                changex[agent] = max(-math.cos(angle)*(-temp_distance), -math.cos(angle)*(-step_size))
+            elif (cent[agent][0] - agent_pos[agent][0]) > 0:
+                changex[agent] = min(math.cos(angle)*(temp_distance), math.cos(angle)*step_size)
+            else:
+                changex[agent] = 0
+                
+            # Calculate the required movement of agent in the Y direction  
+                
+            if (cent[agent][1] - agent_pos[agent][1]) < 0:
+                changey[agent] = max(math.sin(angle)*(-temp_distance), math.sin(angle)*(-step_size))
+            elif (cent[agent][1] - agent_pos[agent][1]) > 0:
+                changey[agent] = min(-math.sin(angle)*(temp_distance), -math.sin(angle)*step_size)
+            else:
+                changey[agent] = 0
             
-        if (cent[agent][1] - agent_pos[agent][1]) < 0:
-            changey = max(math.sin(angle)*(-temp_distance), math.sin(angle)*(-step_size))
-        elif (cent[agent][1] - agent_pos[agent][1]) > 0:
-            changey = min(-math.sin(angle)*(temp_distance), -math.sin(angle)*step_size)
-        else:
-            changey = 0
-        
-        temp_agent_x = agent_pos[agent][0]
-        temp_agent_y = agent_pos[agent][1]
-        moving = True # Record that the robot is now moving, and will move for 2 seconds
-        start = millis() # Start 2 second timer for robot movement
+            temp_agent_x[agent] = agent_pos[agent][0]
+            temp_agent_y[agent] = agent_pos[agent][1]
+            moving[agent] = True # Record that the robot is now moving, and will move for 5 seconds
+            start[agent] = millis() # Start 5 second timer for robot movement
 
     # Coverage metric calculation
     
@@ -305,29 +305,30 @@ def draw():
     else:
         string_list.append("Time: {}, Coverage Metric: {}, Iteration: {}, Agent Positions: {}, Desired Positions: {}".format((millis() - abso_start - buffer)/1000.0, global_coverage, iteration, agent_pos, cent))
     
-    # Record the amount of time an agent has been moving
+    for agent in range(num_agents):
     
-    diff = millis() - start
-    
-    # If point agent has been moving for less than 2 seconds then continue moving agent to desired position
+        # Record the amount of time an agent has been moving
         
-    if (diff <= 2000):
+        diff = millis() - start[agent]
         
-        agent_pos[agent][0] = temp_agent_x + changex*((diff)/2000.0)
-        agent_pos[agent][1] = temp_agent_y + changey*((diff)/2000.0)
-        
-    # If point agent has been moving for more than 2 seconds then stop moving agent
-                 
-    else:
-        
-        agent_pos[agent][0] = temp_agent_x + changex
-        agent_pos[agent][1] = temp_agent_y + changey
+        # If point agent has been moving for less than 5 seconds then continue moving agent to desired position
+            
+        if (diff <= 5000):
+            
+            agent_pos[agent][0] = temp_agent_x[agent] + changex[agent]*((diff)/5000.0)
+            agent_pos[agent][1] = temp_agent_y[agent] + changey[agent]*((diff)/5000.0)
+            
+        # If point agent has been moving for more than 5 seconds then stop moving agent
+                    
+        else:
+            
+            agent_pos[agent][0] = temp_agent_x[agent] + changex[agent]
+            agent_pos[agent][1] = temp_agent_y[agent] + changey[agent]
+                    
+            moving[agent] = False
                 
-        moving = False
-             
-        if int(cent[agent][0] - agent_pos[agent][0]) == 0 and int(cent[agent][1] - agent_pos[agent][1]) == 0: # If distance between agent and its desired position is zero, then agent has arrived at desired position
-            isSuccess[agent] = True
-            agent = agent + 1
+            if int(cent[agent][0] - agent_pos[agent][0]) == 0 and int(cent[agent][1] - agent_pos[agent][1]) == 0: # If distance between agent and its desired position is zero, then agent has arrived at desired position
+                isSuccess[agent] = True
                 
 
     
